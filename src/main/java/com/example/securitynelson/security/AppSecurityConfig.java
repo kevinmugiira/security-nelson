@@ -52,19 +52,22 @@ public class AppSecurityConfig extends WebSecurityConfigurerAdapter {
          UserDetails annaSmithUser = User.builder()
                 .username("annasmith")
                 .password(passwordEncoder.encode("password"))
-                .roles(STUDENT.name()) //implemented the ApplicationUserRole as a static import
+//                .roles(STUDENT.name()) //implemented the ApplicationUserRole as a static import
+                .authorities(STUDENT.getGrantedAuthorities()) //attaching the correct authorities to a perticular user
                 .build();
 
          UserDetails lindaUser = User.builder()
                  .username("linda")
                  .password(passwordEncoder.encode("password"))
-                 .roles(ADMIN.name()) //implemented the ApplicationUserRole as a static import
+//                 .roles(ADMIN.name()) //implemented the ApplicationUserRole as a static import
+                 .authorities(ADMIN.getGrantedAuthorities()) //attaching the correct authorities to a perticular user
                  .build();
 
         UserDetails tomUser = User.builder()
                 .username("tom")
                 .password(passwordEncoder.encode("password"))
-                .roles(ADMINTRAINEE.name()) //implemented the ApplicationUserRole as a static import
+//                .roles(ADMINTRAINEE.name()) //implemented the ApplicationUserRole as a static import
+                .authorities(ADMINTRAINEE.getGrantedAuthorities()) //attaching the correct authorities to a perticular user
                 .build();
 
         return new InMemoryUserDetailsManager(
