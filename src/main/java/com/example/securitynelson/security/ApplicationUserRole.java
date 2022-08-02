@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 import static com.example.securitynelson.security.ApplicationUserPermission.*;
 
 public enum ApplicationUserRole {
-    STUDENT(Sets.newHashSet()),
+    STUDENT(Sets.newHashSet()), /* STUDENT_READ, STUDENT_WRITE */
     ADMIN(Sets.newHashSet(COURSE_READ, COURSE_WRITE, STUDENT_READ, STUDENT_WRITE)),
     ADMINTRAINEE(Sets.newHashSet(COURSE_READ, STUDENT_READ));
 
