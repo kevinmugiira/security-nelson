@@ -12,16 +12,17 @@ import java.util.List;
 public class StudentManagementController {
 
     private static final List<Student> STUDENTS = Arrays.asList(
-            new Student(1, "James Bond"),
-            new Student(2, "Stefan Lockwood"),
-            new Student(3, "Caterina Petranova")
+            new Student(1, "Anna Smith"),
+            new Student(2, "Linda Parrot"),
+            new Student(3, "Tom Bill")
     );
 
     // hasRole('ROLE_') hasAnyRole('ROLE_') hasAuthority('permission') hasAnyAuthority('permission')
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_ADMINTRAINEE')")
+    @PreAuthorize("hasAnyRole('ROLE_STUDENT')")
     public static List<Student> getSTUDENTS() {
+        System.out.println("getAllStudents");
         return STUDENTS;
     }
 
