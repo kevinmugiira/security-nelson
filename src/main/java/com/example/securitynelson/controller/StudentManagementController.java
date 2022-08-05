@@ -15,13 +15,13 @@ public class StudentManagementController {
     private static final List<Student> STUDENTS = Arrays.asList(
             new Student(1, "Anna Smith"),
             new Student(2, "Linda Parrot"),
-            new Student(3, "Tom Bill")
+            new Student(3, "Thomas Bill")
     );
 
     // hasRole('ROLE_') hasAnyRole('ROLE_') hasAuthority('permission') hasAnyAuthority('permission')
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ROLE_STUDENT')")
+//    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_ADMINTRAINEE')")
     public static List<Student> getSTUDENTS() {
         System.out.println("getAllStudents");
         return STUDENTS;

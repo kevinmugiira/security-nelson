@@ -1,26 +1,21 @@
 package com.example.securitynelson.security;
 
 
+import com.example.securitynelson.auth.ApplicationUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
-import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import java.util.concurrent.TimeUnit;
 
-import static com.example.securitynelson.security.ApplicationUserPermission.*;
 import static com.example.securitynelson.security.ApplicationUserRole.*;
 
 @Configuration
@@ -29,10 +24,12 @@ import static com.example.securitynelson.security.ApplicationUserRole.*;
 public class AppSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final PasswordEncoder passwordEncoder;
+    private final ApplicationUserService applicationUserService;
 
     @Autowired
-    public AppSecurityConfig(PasswordEncoder passwordEncoder) {
+    public AppSecurityConfig(PasswordEncoder passwordEncoder, ApplicationUserService applicationUserService) {
         this.passwordEncoder = passwordEncoder;
+        this.applicationUserService = applicationUserService;
     }
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -40,8 +37,8 @@ public class AppSecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
                 .authorizeRequests()
                 .antMatchers("/","index", "/css/*", "/js/*").permitAll()
-                .antMatchers("/api/**").hasRole(STUDENT.name()) //allows the role to access any and all urls beginning with 'api'
-                .antMatchers( "/management/api/**").hasAnyRole(ADMIN.name()) //handles permissions for get requests
+                .antMatchers("/api/**").hasAnyRole(STUDENT.name(),ADMIN.name()) //allows the role to access any and all urls beginning with 'api'
+                .antMatchers( "/management/api/**").hasAnyRole(ADMIN.name(),ADMINTRAINEE.name()) //handles permissions for get requests
                 .anyRequest()
                 .authenticated()
                 .and()
@@ -64,40 +61,19 @@ public class AppSecurityConfig extends WebSecurityConfigurerAdapter {
                     .invalidateHttpSession(true)
                     .deleteCookies("JSESSIONID", "remember-me")
                     .logoutSuccessUrl("/login")
-
         ;
-
-
     }
 
     @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth.authenticationProvider(daoAuthenticationProvider());
+    }
+
     @Bean
-    protected UserDetailsService userDetailsService() {
-         UserDetails annaSmithUser = User.builder()
-                .username("annasmith")
-                .password(passwordEncoder.encode("password"))
-//                .roles(STUDENT.name()) //implemented the ApplicationUserRole as a static import
-                .authorities(STUDENT.getGrantedAuthorities()) //attaching the correct authorities to a pArticular user
-                .build();
-
-         UserDetails lindaUser = User.builder()
-                 .username("linda")
-                 .password(passwordEncoder.encode("password"))
-//                 .roles(ADMIN.name()) //implemented the ApplicationUserRole as a static import
-                 .authorities(ADMIN.getGrantedAuthorities()) //attaching the correct authorities to a perticular user
-                 .build();
-
-        UserDetails tomUser = User.builder()
-                .username("tom")
-                .password(passwordEncoder.encode("password"))
-//                .roles(ADMINTRAINEE.name()) //implemented the ApplicationUserRole as a static import
-                .authorities(ADMINTRAINEE.getGrantedAuthorities()) //attaching the correct authorities to a perticular user
-                .build();
-
-        return new InMemoryUserDetailsManager(
-                annaSmithUser,
-                lindaUser,
-                tomUser
-        );
+    public DaoAuthenticationProvider daoAuthenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setPasswordEncoder(passwordEncoder);
+        provider.setUserDetailsService(applicationUserService);
+        return provider;
     }
 }
