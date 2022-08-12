@@ -2,6 +2,7 @@ package com.example.securitynelson.security;
 
 
 import com.example.securitynelson.auth.ApplicationUserService;
+import com.example.securitynelson.jwt.JwtTokenVerifier;
 import com.example.securitynelson.jwt.JwtUsernameAndPasswordAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -40,6 +41,7 @@ public class AppSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .addFilter(new JwtUsernameAndPasswordAuthenticationFilter(authenticationManager()))
+                .addFilterAfter(new JwtTokenVerifier(), JwtUsernameAndPasswordAuthenticationFilter.class) //registering the token verifier filter
                 .authorizeRequests()
                 .antMatchers("/","index", "/css/*", "/js/*").permitAll()
                 .antMatchers("/api/**").hasAnyRole(STUDENT.name(),ADMIN.name()) //allows the role to access any and all urls beginning with 'api'
