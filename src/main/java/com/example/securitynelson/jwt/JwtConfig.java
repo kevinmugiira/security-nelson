@@ -2,11 +2,8 @@ package com.example.securitynelson.jwt;
 
 
 import com.google.common.net.HttpHeaders;
-import io.jsonwebtoken.security.Keys;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
-
-import javax.crypto.SecretKey;
 
 @ConfigurationProperties(prefix = "application.jwt")
 @Component
@@ -14,7 +11,7 @@ public class JwtConfig {
 
     private String secretKey;
     private String tokenPrefix;
-    private String tokenExpirationAfterDays;
+    private Integer tokenExpirationAfterDays;
 
     public JwtConfig() {
     }
@@ -35,16 +32,12 @@ public class JwtConfig {
         this.tokenPrefix = tokenPrefix;
     }
 
-    public String getTokenExpirationAfterDays() {
+    public Integer getTokenExpirationAfterDays() {
         return tokenExpirationAfterDays;
     }
 
-    public void setTokenExpirationAfterDays(String tokenExpirationAfterDays) {
+    public void setTokenExpirationAfterDays(Integer tokenExpirationAfterDays) {
         this.tokenExpirationAfterDays = tokenExpirationAfterDays;
-    }
-
-    public SecretKey getSecretKeyForSigning() {
-        return Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
     public String getAuthorizationHeader() {

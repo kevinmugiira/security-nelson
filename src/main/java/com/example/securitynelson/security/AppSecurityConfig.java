@@ -2,6 +2,7 @@ package com.example.securitynelson.security;
 
 
 import com.example.securitynelson.auth.ApplicationUserService;
+import com.example.securitynelson.jwt.JwtConfig;
 import com.example.securitynelson.jwt.JwtTokenVerifier;
 import com.example.securitynelson.jwt.JwtUsernameAndPasswordAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,9 +16,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
-import java.util.concurrent.TimeUnit;
+import javax.crypto.SecretKey;
 
 import static com.example.securitynelson.security.ApplicationUserRole.*;
 
@@ -28,11 +28,15 @@ public class AppSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final PasswordEncoder passwordEncoder;
     private final ApplicationUserService applicationUserService;
+    private final SecretKey secretKey;
+    private final JwtConfig jwtConfig;
 
     @Autowired
-    public AppSecurityConfig(PasswordEncoder passwordEncoder, ApplicationUserService applicationUserService) {
+    public AppSecurityConfig(PasswordEncoder passwordEncoder, ApplicationUserService applicationUserService, SecretKey secretKey, JwtConfig jwtConfig) {
         this.passwordEncoder = passwordEncoder;
         this.applicationUserService = applicationUserService;
+        this.secretKey = secretKey;
+        this.jwtConfig = jwtConfig;
     }
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -40,8 +44,8 @@ public class AppSecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .addFilter(new JwtUsernameAndPasswordAuthenticationFilter(authenticationManager()))
-                .addFilterAfter(new JwtTokenVerifier(), JwtUsernameAndPasswordAuthenticationFilter.class) //registering the token verifier filter
+                .addFilter(new JwtUsernameAndPasswordAuthenticationFilter(authenticationManager(), jwtConfig, secretKey))
+                .addFilterAfter(new JwtTokenVerifier( secretKey,jwtConfig), JwtUsernameAndPasswordAuthenticationFilter.class) //registering the token verifier filter
                 .authorizeRequests()
                 .antMatchers("/","index", "/css/*", "/js/*").permitAll()
                 .antMatchers("/api/**").hasAnyRole(STUDENT.name(),ADMIN.name()) //allows the role to access any and all urls beginning with 'api'
